@@ -27,7 +27,6 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/beat-the-crew
       NODE_ENV: development
 
-      # optional if hot reload acts stupid
       CHOKIDAR_USEPOLLING: true
       WATCHPACK_POLLING: true
 
