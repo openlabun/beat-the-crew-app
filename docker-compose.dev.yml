@@ -42,11 +42,6 @@ services:
       postgres:
         condition: service_healthy
 
-    command: sh -c "
-      pnpm prisma generate &&
-      pnpm prisma migrate deploy &&
-      pnpm start:dev
-      "
-
+    command: sh -c "mkdir -p libs/common/src/generated && pnpm exec nest start gateway --watch"
 volumes:
   postgres_data:
