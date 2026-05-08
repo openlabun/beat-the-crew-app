@@ -48,14 +48,14 @@ model Battle {
   votingOpen         Boolean         @default(false)
   yellowVotes        Int             @default(0)
   purpleVotes        Int             @default(0)
-  yellowContestantId Int
-  purpleContestantId Int
+  yellowContestantId Int?
+  purpleContestantId Int?
   winnerId           Int?
   createdAt          DateTime        @default(now())
 
   event              Event           @relation(fields: [eventId], references: [id])
-  yellowContestant   Contestant      @relation("YellowContestant", fields: [yellowContestantId], references: [id])
-  purpleContestant   Contestant      @relation("PurpleContestant", fields: [purpleContestantId], references: [id])
+  yellowContestant   Contestant?     @relation("YellowContestant", fields: [yellowContestantId], references: [id])
+  purpleContestant   Contestant?     @relation("PurpleContestant", fields: [purpleContestantId], references: [id])
   winner             Contestant?     @relation("BattleWinner", fields: [winnerId], references: [id])
   voteSessions       VoteSession[]
 
@@ -66,9 +66,10 @@ model Battle {
 model VoteSession {
   id        Int        @id @default(autoincrement())
   battleId  Int
-  userId    Int
+  userId    String
   votedFor  VoteChoice
   createdAt DateTime   @default(now())
+
   battle    Battle     @relation(fields: [battleId], references: [id])
 
   @@unique([battleId, userId])
