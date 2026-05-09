@@ -2,76 +2,60 @@
 # Builder stage
 # =========================
 FROM node:lts-alpine AS builder
-
 WORKDIR /app
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm && \
+    pnpm config set store-dir /root/.pnpm-store
 
-COPY package.json pnpm-lock.yaml ./
-
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-# Prisma generate if needed
-RUN npx prisma generate
-
-# Build app
+RUN pnpm exec prisma generate
 RUN pnpm run build
-
 
 # =========================
 # Development stage
 # =========================
 FROM node:lts-alpine AS development
-
 WORKDIR /app
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm && \
+    pnpm config set store-dir /root/.pnpm-store
 
-COPY package.json pnpm-lock.yaml ./
-
-RUN pnpm install
-
-# Source usually mounted via docker compose
-COPY . .
+# Copy node_modules from builder — no pnpm install needed here
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
-
-CMD ["pnpm", "run", "start:dev"]
-
 
 # =========================
 # Production stage
 # =========================
 FROM node:lts-alpine AS production
-
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV HUSKY=0
 
 RUN apk add --no-cache dumb-init openssl && \
-    npm install -g pnpm prisma
+    npm install -g pnpm prisma && \
+    pnpm config set store-dir /root/.pnpm-store
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 RUN npm pkg delete scripts.prepare && \
     pnpm install --prod --frozen-lockfile
 
-# Prisma stuff
 COPY prisma ./prisma
-
 RUN prisma generate
 
-# Built app
 COPY --from=builder /app/dist ./dist
 
-# Optional: static/public assets
-# COPY --from=builder /app/public ./public
-
 RUN addgroup -S nodejs && \
-    adduser -S nestjs -G nodejs
+    adduser -S nestjs -G nodejs && \
+    chown -R nestjs:nodejs /app
 
 USER nestjs
 

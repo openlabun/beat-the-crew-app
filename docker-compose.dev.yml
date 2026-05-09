@@ -26,6 +26,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/beat-the-crew
       NODE_ENV: development
+      CI: "true"
 
       CHOKIDAR_USEPOLLING: true
       WATCHPACK_POLLING: true
@@ -35,12 +36,11 @@ services:
 
     volumes:
       - .:/app
-      - /app/node_modules
 
     depends_on:
       postgres:
         condition: service_healthy
 
-    command: sh -c "mkdir -p libs/common/src/generated && pnpm exec nest start gateway --watch"
+    command: sh -c "pnpm exec prisma generate && mkdir -p libs/common/src/generated && pnpm exec nest start gateway --watch"
 volumes:
   postgres_data:
