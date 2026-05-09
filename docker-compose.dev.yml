@@ -17,30 +17,29 @@ services:
       timeout: 3s
       retries: 10
 
-  beat-the-crew-backend:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
       target: development
-    container_name: beat-the-crew-backend
+    container_name: beat-the-crew
+    env_file:
+      - .env
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/beat-the-crew
       NODE_ENV: development
       CI: "true"
-
       CHOKIDAR_USEPOLLING: true
       WATCHPACK_POLLING: true
-
     ports:
       - "3000:3000"
-
     volumes:
-      - .:/app
-
+      - ./src:/app/src
+      - ./prisma:/app/prisma
     depends_on:
       postgres:
         condition: service_healthy
+    command: sh -c "pnpm exec prisma generate && pnpm exec prisma migrate deploy && pnpm exec nest start --watch"
 
-    command: sh -c "pnpm exec prisma generate && mkdir -p libs/common/src/generated && pnpm exec nest start gateway --watch"
 volumes:
   postgres_data:
