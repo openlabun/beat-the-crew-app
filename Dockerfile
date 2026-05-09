@@ -28,6 +28,12 @@ RUN npm install -g pnpm && \
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY --from=builder /app/node_modules ./node_modules
 
+RUN chown -R node:node /app/node_modules && \
+    mkdir -p dist && \
+    chown -R node:node /app/dist
+
+USER node
+
 EXPOSE 3000
 
 # =========================
