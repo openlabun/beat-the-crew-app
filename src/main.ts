@@ -29,7 +29,7 @@ async function bootstrap() {
         in: 'cookie',
         description: 'JWT access token stored in HTTP-only cookie. Set automatically after login.',
       },
-      'JWT-auth',
+      'access-token',
     )
     .build();
 

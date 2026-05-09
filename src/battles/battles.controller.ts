@@ -27,7 +27,7 @@ export class BattlesController {
 
   @Patch(':id/open')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Open voting for a battle' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Voting opened, emits voting:opened to all clients' })
@@ -39,7 +39,7 @@ export class BattlesController {
 
   @Patch(':id/close')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Close voting and silently determine winner or tie' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Voting closed, result stored but not announced yet' })
@@ -51,7 +51,7 @@ export class BattlesController {
 
   @Patch(':id/announce')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Announce the result — emits battle:winner or battle:tie to all clients' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Result announced' })
@@ -63,7 +63,7 @@ export class BattlesController {
 
   @Patch(':id/rerun')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Reset a tied battle for a rerun — emits battle:rerun to all clients' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Battle reset, ready to be reopened' })
@@ -75,7 +75,7 @@ export class BattlesController {
 
   @Get(':id/tally')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get live vote tally for a battle (admin only)' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Returns current yellow and purple vote counts' })
