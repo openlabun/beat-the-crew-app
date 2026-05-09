@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AddContestantsDto {
   @ApiProperty({
-    example: ['Alex', 'Jordan', 'Sam', 'Taylor'],
+    example: ['Sol', 'Joselin', 'Ricitos', 'Andy'],
     minItems: 2,
     maxItems: 16,
     type: [String],
