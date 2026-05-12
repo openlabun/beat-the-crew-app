@@ -1,6 +1,6 @@
 import type { Battle, Event, VoteTally, ContestantGroup, VoteChoice, Contestant } from "./types"
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
 
 // Helper to get auth header
 function getAuthHeader(): HeadersInit {
@@ -10,11 +10,11 @@ function getAuthHeader(): HeadersInit {
 }
 
 // Auth
-export async function login(password: string): Promise<{ accessToken: string }> {
+export async function login(username: string, password: string): Promise<{ accessToken: string }> {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ username, password }),
   })
   if (!res.ok) throw new Error("Invalid password")
   return res.json()

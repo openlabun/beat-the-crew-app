@@ -12,6 +12,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -22,7 +23,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     setIsLoading(true)
 
     try {
-      const result = await login(password)
+      const result = await login(username, password)
       onSuccess(result.accessToken)
     } catch (err) {
       setError("Contraseña incorrecta")
@@ -62,6 +63,21 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="username" className="text-foreground uppercase tracking-wider text-sm">
+              Usuario
+            </Label>
+            <Input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="bg-btc-dark-lighter border-btc-yellow/50 text-foreground h-12 focus:border-btc-yellow focus:ring-btc-yellow"
+              placeholder="Ingrese su usuario"
+              required
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="password" className="text-foreground uppercase tracking-wider text-sm">
               Contraseña
