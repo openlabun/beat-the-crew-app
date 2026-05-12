@@ -35,6 +35,26 @@ function ScreenApp() {
     event: null,
   })
   const { isConnected } = useSocket()
+  const [currentMode, setCurrentMode] = useState<ScreenMode>('logo')
+  const [prevMode, setPrevMode] = useState<ScreenMode | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+
+  const switchMode = useCallback((newMode: ScreenMode) => {
+    if (newMode === currentMode || isTransitioning) return
+    setIsTransitioning(true)
+    
+    // Change content halfway through the wipe animation (300ms out of 600ms)
+    setTimeout(() => {
+      setCurrentMode(newMode)
+      setPrevMode(null)
+    }, 300)
+    
+    // Finish transitioning after animation completes
+    setTimeout(() => {
+      setIsTransitioning(false)
+    }, 600)
+  }, [currentMode, isTransitioning])
+
 
   // Load event and bracket data
   const loadData = useCallback(async () => {
@@ -99,37 +119,71 @@ function ScreenApp() {
       if (e.key === "btc_screen_command") {
         const command = e.newValue
         if (command === "show_bracket") {
+          switchMode("bracket")
           setState((prev) => ({ ...prev, mode: "bracket" }))
         } else if (command === "show_logo") {
+          switchMode("logo")
           setState((prev) => ({ ...prev, mode: "logo" }))
         } else if (command?.startsWith("group:")) {
           const group = command.replace("group:", "") as ContestantGroup
-          setState((prev) => ({ ...prev, group }))
-          loadData()
+          // Always trigger transition when switching groups, even if already on bracket
+          setIsTransitioning(true)
+          setTimeout(() => {
+            setState((prev) => ({ ...prev, group }))
+            loadData()
+          }, 300)
+          setTimeout(() => {
+            setIsTransitioning(false)
+          }, 600)
         }
       }
     }
 
     window.addEventListener("storage", handleStorage)
     return () => window.removeEventListener("storage", handleStorage)
-  }, [loadData])
+  }, [loadData, switchMode])
 
   return (
-    <main className="min-h-screen w-full overflow-hidden bg-btc-dark">
-      {state.mode === "logo" && <LogoView eventName={state.event?.name} />}
-      {state.mode === "bracket" && (
-        <BracketView battles={state.battles} group={state.group} />
-      )}
-      {state.mode === "winner" && state.winnerData && (
-        <WinnerReveal
-          winnerName={state.winnerData.winnerName}
-          yellowVotes={state.winnerData.yellowVotes}
-          purpleVotes={state.winnerData.purpleVotes}
+    <main className="min-h-screen w-full overflow-hidden bg-btc-dark relative">
+      <style>{`
+        @keyframes wipeRight {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100vw);
+          }
+        }
+      `}</style>
+      
+      {/* Base content */}
+      <div className="absolute inset-0">
+        <ModeContent mode={currentMode} state={state} />
+      </div>
+
+      {/* Wipe overlay - purple and yellow stripes */}
+      {isTransitioning && (
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(90deg, #eab308 0%, #9333ea 50%, #eab308 100%)',
+            backgroundSize: '200% 100%',
+            animation: 'wipeRight 0.6s ease-in-out forwards',
+            zIndex: 50,
+          }}
         />
       )}
-      {state.mode === "tie" && <TieReveal />}
     </main>
   )
+}
+
+function ModeContent({ mode, state }: { mode: ScreenMode, state: ScreenState }) {
+  switch (mode) {
+    case 'logo':    return <LogoView eventName={state.event?.name} />
+    case 'bracket': return <BracketView battles={state.battles} group={state.group} />
+    case 'winner':  return state.winnerData ? <WinnerReveal {...state.winnerData} /> : null
+    case 'tie':     return <TieReveal />
+  }
 }
 
 export default function ScreenPage() {
