@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ContestantGroup } from '@prisma/client';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -6,6 +6,7 @@ import { AddContestantsDto } from './dto/add-contestants.dto';
 
 @Injectable()
 export class EventsService {
+  private readonly logger = new Logger(EventsService.name);
   constructor(private readonly prisma: PrismaService) {}
 
   async createEvent(dto: CreateEventDto) {
