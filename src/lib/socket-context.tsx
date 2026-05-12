@@ -144,3 +144,43 @@ export function useVotesUpdated(callback: (payload: VotesUpdatedPayload) => void
     }
   }, [socket, callback])
 }
+
+// Screen control hooks
+export function useScreenCommand(callback: (command: string) => void) {
+  const { socket } = useSocket()
+
+  useEffect(() => {
+    if (!socket) return
+
+    socket.on("screen:command", callback)
+    return () => {
+      socket.off("screen:command", callback)
+    }
+  }, [socket, callback])
+}
+
+export function useScreenGroupCommand(callback: (group: string) => void) {
+  const { socket } = useSocket()
+
+  useEffect(() => {
+    if (!socket) return
+
+    socket.on("screen:group", callback)
+    return () => {
+      socket.off("screen:group", callback)
+    }
+  }, [socket, callback])
+}
+
+// Helper function to emit screen commands
+export function emitScreenCommand(socket: Socket | null, command: string) {
+  if (socket) {
+    socket.emit("screen:command", command)
+  }
+}
+
+export function emitScreenGroup(socket: Socket | null, group: string) {
+  if (socket) {
+    socket.emit("screen:group", group)
+  }
+}

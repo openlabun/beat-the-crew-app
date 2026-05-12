@@ -3,18 +3,18 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useState } from "react"
+import { useSocket, emitScreenCommand, emitScreenGroup } from "@/lib/socket-context"
 
 export function ScreenControl() {
   const [displayMode, setDisplayMode] = useState<"logo" | "bracket_crew" | "bracket_invited">("logo")
+  const { socket } = useSocket()
 
   const sendCommand = (command: string) => {
-    // Use localStorage to communicate with screen page
-    localStorage.setItem("btc_screen_command", command)
-    // Trigger storage event for same-origin pages
-    window.dispatchEvent(new StorageEvent("storage", {
-      key: "btc_screen_command",
-      newValue: command,
-    }))
+    emitScreenCommand(socket, command)
+  }
+
+  const sendGroupCommand = (group: string) => {
+    emitScreenGroup(socket, group)
   }
 
   const handleShowLogo = () => {
@@ -25,13 +25,13 @@ export function ScreenControl() {
   const handleShowBracketCrew = () => {
     setDisplayMode("bracket_crew")
     sendCommand("show_bracket")
-    sendCommand("group:CREW")
+    sendGroupCommand("CREW")
   }
 
   const handleShowBracketInvited = () => {
     setDisplayMode("bracket_invited")
     sendCommand("show_bracket")
-    sendCommand("group:INVITED")
+    sendGroupCommand("INVITED")
   }
 
   return (

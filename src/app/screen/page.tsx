@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import { SocketProvider, useVotingOpened, useBattleWinner, useBattleTie, useBattleRerun, useBattleForfeit, useSocket } from "@/lib/socket-context"
+import { SocketProvider, useVotingOpened, useBattleWinner, useBattleTie, useBattleRerun, useBattleForfeit, useSocket, useScreenCommand, useScreenGroupCommand } from "@/lib/socket-context"
 import { getBracket, getActiveBattle, getEvent } from "@/lib/api"
 import { ContestantGroup, type Battle, type Event } from "@/lib/types"
 import { BracketView } from "@/components/screen/bracket-view"
@@ -113,35 +113,31 @@ function ScreenApp() {
   useBattleRerun(handleBattleRerun)
   useBattleForfeit(handleBattleForfeit)
 
-  // Listen for admin commands via localStorage (for local control)
-  useEffect(() => {
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === "btc_screen_command") {
-        const command = e.newValue
-        if (command === "show_bracket") {
-          switchMode("bracket")
-          setState((prev) => ({ ...prev, mode: "bracket" }))
-        } else if (command === "show_logo") {
-          switchMode("logo")
-          setState((prev) => ({ ...prev, mode: "logo" }))
-        } else if (command?.startsWith("group:")) {
-          const group = command.replace("group:", "") as ContestantGroup
-          // Always trigger transition when switching groups, even if already on bracket
-          setIsTransitioning(true)
-          setTimeout(() => {
-            setState((prev) => ({ ...prev, group }))
-            loadData()
-          }, 300)
-          setTimeout(() => {
-            setIsTransitioning(false)
-          }, 600)
-        }
-      }
+  // Listen for admin commands via WebSocket
+  const handleScreenCommand = useCallback((command: string) => {
+    if (command === "show_bracket") {
+      switchMode("bracket")
+      setState((prev) => ({ ...prev, mode: "bracket" }))
+    } else if (command === "show_logo") {
+      switchMode("logo")
+      setState((prev) => ({ ...prev, mode: "logo" }))
     }
+  }, [switchMode])
 
-    window.addEventListener("storage", handleStorage)
-    return () => window.removeEventListener("storage", handleStorage)
-  }, [loadData, switchMode])
+  const handleScreenGroup = useCallback((group: string) => {
+    // Always trigger transition when switching groups
+    setIsTransitioning(true)
+    setTimeout(() => {
+      setState((prev) => ({ ...prev, group: group as ContestantGroup }))
+      loadData()
+    }, 300)
+    setTimeout(() => {
+      setIsTransitioning(false)
+    }, 600)
+  }, [loadData])
+
+  useScreenCommand(handleScreenCommand)
+  useScreenGroupCommand(handleScreenGroup)
 
   return (
     <main className="min-h-screen w-full overflow-hidden bg-btc-dark relative">
