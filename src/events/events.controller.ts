@@ -7,13 +7,13 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('events')
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Create a new event' })
   @ApiResponse({ status: 201, description: 'Event created' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -32,6 +32,8 @@ export class EventsController {
   }
 
   @Post(':id/contestants')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Add contestants to an event for a given group' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 201, description: 'Contestants added' })
@@ -46,6 +48,8 @@ export class EventsController {
   }
 
   @Post(':id/generate')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Randomly generate the bracket for a group' })
   @ApiParam({ name: 'id', type: Number })
   @ApiQuery({ name: 'group', enum: ContestantGroup })
@@ -61,6 +65,8 @@ export class EventsController {
   }
 
   @Post(':id/reshuffle')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Reshuffle the bracket for a group (only allowed if no battles have been played)' })
   @ApiParam({ name: 'id', type: Number })
   @ApiQuery({ name: 'group', enum: ContestantGroup })
