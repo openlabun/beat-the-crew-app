@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   description: 'Live voting system for Beat The Crew Dance Battle at UNC. Vote for your favorite dancers in real-time!',
   generator: 'v0.app',
   icons: {
-    icon: '/images/logo.svg',
-    apple: '/images/logo.svg',
+    icon: '/images/star.ico',
+    apple: '/images/star.ico',
   },
 }
 
