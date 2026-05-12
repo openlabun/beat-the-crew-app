@@ -2,8 +2,11 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState } from "react"
 
 export function ScreenControl() {
+  const [displayMode, setDisplayMode] = useState<"logo" | "bracket_crew" | "bracket_invited">("logo")
+
   const sendCommand = (command: string) => {
     // Use localStorage to communicate with screen page
     localStorage.setItem("btc_screen_command", command)
@@ -14,9 +17,21 @@ export function ScreenControl() {
     }))
   }
 
-  const openScreenWindow = (mode: "bracket" | "logo") => {
-    const url = `/screen?mode=${mode}`
-    window.open(url, "btc_screen", "width=1920,height=1080")
+  const handleShowLogo = () => {
+    setDisplayMode("logo")
+    sendCommand("show_logo")
+  }
+
+  const handleShowBracketCrew = () => {
+    setDisplayMode("bracket_crew")
+    sendCommand("show_bracket")
+    sendCommand("group:CREW")
+  }
+
+  const handleShowBracketInvited = () => {
+    setDisplayMode("bracket_invited")
+    sendCommand("show_bracket")
+    sendCommand("group:INVITED")
   }
 
   return (
@@ -27,56 +42,37 @@ export function ScreenControl() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Mode buttons */}
+        {/* Display mode buttons */}
         <div className="flex gap-2">
           <Button
-            onClick={() => sendCommand("show_bracket")}
-            className="flex-1 bg-btc-purple text-foreground hover:bg-btc-purple-light"
+            onClick={handleShowLogo}
+            className={`flex-1 ${
+              displayMode === "logo"
+                ? "bg-muted text-muted-foreground border-2 border-gray-700 hover:bg-muted"
+                : "bg-btc-dark text-foreground border-2 border-btc-dark hover:bg-gray-800"
+            }`}
           >
-            Mostrar Bracket
+            Logo
           </Button>
           <Button
-            onClick={() => sendCommand("show_logo")}
-            variant="outline"
-            className="flex-1 border-border text-foreground hover:bg-muted"
+            onClick={handleShowBracketCrew}
+            className={`flex-1 ${
+              displayMode === "bracket_crew"
+                ? "bg-btc-purple/50 text-btc-purple border-2 border-btc-purple hover:bg-btc-purple/50"
+                : "bg-btc-purple text-foreground border-2 border-btc-purple hover:bg-btc-purple/80"
+            }`}
           >
-            Mostrar Logo
-          </Button>
-        </div>
-
-        {/* Open in new window */}
-        <div className="flex gap-2">
-          <Button
-            onClick={() => openScreenWindow("bracket")}
-            variant="ghost"
-            className="flex-1 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Abrir Bracket en Ventana
+            Bracket Crew
           </Button>
           <Button
-            onClick={() => openScreenWindow("logo")}
-            variant="ghost"
-            className="flex-1 text-xs text-muted-foreground hover:text-foreground"
+            onClick={handleShowBracketInvited}
+            className={`flex-1 ${
+              displayMode === "bracket_invited"
+                ? "bg-btc-yellow/50 text-btc-yellow border-2 border-btc-yellow hover:bg-btc-yellow/50"
+                : "bg-btc-yellow text-btc-dark border-2 border-btc-yellow hover:bg-btc-yellow/80"
+            }`}
           >
-            Abrir Logo en Ventana
-          </Button>
-        </div>
-
-        {/* Group selector */}
-        <div className="flex gap-2">
-          <Button
-            onClick={() => sendCommand("group:CREW")}
-            variant="outline"
-            className="flex-1 text-xs border-btc-yellow text-btc-yellow hover:bg-btc-yellow hover:text-btc-dark"
-          >
-            Grupo Crew
-          </Button>
-          <Button
-            onClick={() => sendCommand("group:INVITED")}
-            variant="outline"
-            className="flex-1 text-xs border-btc-purple text-btc-purple hover:bg-btc-purple hover:text-foreground"
-          >
-            Grupo Invitados
+            Bracket Invitados
           </Button>
         </div>
       </CardContent>

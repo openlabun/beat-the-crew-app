@@ -86,7 +86,7 @@ function BattleCard({ battle }: BattleCardProps) {
   const winnerId = battle.winnerId
 
   return (
-    <div className="flex flex-col gap-1 min-w-[140px]">
+    <div className="flex flex-col gap-1 min-w-35">
       <ContestantSlot
         name={yellowName}
         isWinner={winnerId === battle.yellowContestantId}

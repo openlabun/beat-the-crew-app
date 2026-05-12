@@ -53,20 +53,6 @@ function ScreenApp() {
     loadData()
   }, [loadData])
 
-  // Listen for URL params to control screen mode
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const mode = params.get("mode") as ScreenMode | null
-    const group = params.get("group") as ContestantGroup | null
-    
-    if (mode && ["logo", "bracket"].includes(mode)) {
-      setState((prev) => ({ ...prev, mode }))
-    }
-    if (group && Object.values(ContestantGroup).includes(group)) {
-      setState((prev) => ({ ...prev, group }))
-    }
-  }, [])
-
   // Socket event handlers
   const handleVotingOpened = useCallback(() => {
     loadData()
