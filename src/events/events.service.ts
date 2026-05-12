@@ -10,6 +10,7 @@ export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createEvent(dto: CreateEventDto) {
+    this.logger.log(`Creating event: ${dto.name}`);
     return this.prisma.event.create({
       data: { name: dto.name },
     });
@@ -44,10 +45,12 @@ export class EventsService {
       seed: index + 1,
     }));
 
+    this.logger.log(`Adding ${data.length} contestants to event ${eventId}, group ${dto.group}`);
     return this.prisma.contestant.createMany({ data });
   }
 
   async generateBracket(eventId: number, group: ContestantGroup) {
+    this.logger.log(`Generating bracket for event ${eventId}, group ${group}`);
     const event = await this.prisma.event.findUnique({ where: { id: eventId } });
     if (!event) throw new NotFoundException('Event not found');
 
