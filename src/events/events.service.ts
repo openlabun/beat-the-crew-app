@@ -123,6 +123,30 @@ export class EventsService {
     });
   }
 
+  async reshuffleBracket(eventId: number, group: ContestantGroup) {
+    this.logger.log(`Reshuffling bracket for event ${eventId}, group ${group}`);
+
+    const existingBattles = await this.prisma.battle.findMany({
+      where: { eventId, group },
+    });
+
+    if (existingBattles.length === 0) {
+      throw new BadRequestException('Bracket has not been generated yet');
+    }
+
+    // Can only reshuffle if no battles have been completed (no winners set)
+    const completedBattles = existingBattles.filter((b) => b.winnerId !== null);
+    if (completedBattles.length > 0) {
+      throw new BadRequestException('Cannot reshuffle bracket after battles have been completed');
+    }
+
+    await this.prisma.battle.deleteMany({
+      where: { eventId, group },
+    });
+
+    return this.generateBracket(eventId, group);
+  }
+
   async getBracket(eventId: number, group: ContestantGroup) {
     const event = await this.prisma.event.findUnique({ where: { id: eventId } });
     if (!event) throw new NotFoundException('Event not found');

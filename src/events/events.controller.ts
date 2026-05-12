@@ -60,6 +60,21 @@ export class EventsController {
     return this.eventsService.generateBracket(id, group);
   }
 
+  @Post(':id/reshuffle')
+  @ApiOperation({ summary: 'Reshuffle the bracket for a group (only allowed if no battles have been played)' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiQuery({ name: 'group', enum: ContestantGroup })
+  @ApiResponse({ status: 200, description: 'Bracket reshuffled and returned' })
+  @ApiResponse({ status: 400, description: 'Cannot reshuffle after battles have been played' })
+  @ApiResponse({ status: 404, description: 'Event not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  reshuffleBracket(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('group') group: ContestantGroup,
+  ) {
+    return this.eventsService.reshuffleBracket(id, group);
+  }
+
   @Get(':id/bracket')
   @ApiOperation({ summary: 'Get the full bracket for a group' })
   @ApiParam({ name: 'id', type: Number })
