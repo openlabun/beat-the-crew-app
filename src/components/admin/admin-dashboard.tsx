@@ -54,7 +54,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
       setBattles(bracketData)
 
       // Find active battle
-      const active = bracketData.find((b: Battle) => b.votingOpen)
+      const active = bracketData.find((b: Battle) => b.active)
       setActiveBattle(active || null)
 
       if (active) {

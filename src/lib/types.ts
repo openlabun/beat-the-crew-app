@@ -37,6 +37,7 @@ export interface Battle {
   winnerId: number | null
   winner: Contestant | null
   votingOpen: boolean
+  active: boolean
 }
 
 export interface Event {
