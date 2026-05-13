@@ -79,29 +79,29 @@ function ScreenApp() {
   }, [loadData])
 
   const handleBattleWinner = useCallback((payload: { battleId: number; winnerId: number; winnerName: string; yellowVotes: number; purpleVotes: number }) => {
-    setState((prev) => ({
-      ...prev,
-      mode: "winner",
-      winnerData: payload,
-    }))
-    // Return to bracket after delay
+    setState((prev) => ({ ...prev, winnerData: payload }))
+    switchMode("winner")
+
     setTimeout(() => {
       loadData()
-      setState((prev) => ({ ...prev, mode: "bracket", winnerData: undefined }))
+      switchMode("bracket")
+      setState((prev) => ({ ...prev, winnerData: undefined }))
     }, 8000)
-  }, [loadData])
+  }, [loadData, switchMode])
 
   const handleBattleTie = useCallback((payload: { battleId: number }) => {
     setState((prev) => ({ ...prev, mode: "tie" }))
+    switchMode("tie")
     setTimeout(() => {
       setState((prev) => ({ ...prev, mode: "bracket" }))
     }, 5000)
-  }, [])
+  }, [switchMode])
 
   const handleBattleRerun = useCallback(() => {
     setState((prev) => ({ ...prev, mode: "bracket" }))
+    switchMode("bracket")
     loadData()
-  }, [loadData])
+  }, [loadData, switchMode])
 
   const handleBattleForfeit = useCallback(() => {
     loadData()
