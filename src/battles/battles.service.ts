@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { BattlesGateway } from './battles.gateway';
 
 @Injectable()
 export class BattlesService {
+  private readonly logger = new Logger(BattlesService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly gateway: BattlesGateway,
@@ -57,16 +58,13 @@ export class BattlesService {
 
     // Determine winner or tie — store result silently, emit nothing
     const isTie = battle.yellowVotes === battle.purpleVotes;
-    const winnerId = isTie
-      ? null
-      : battle.yellowVotes > battle.purpleVotes
-        ? battle.yellowContestantId!
-        : battle.purpleContestantId!;
+
+    this.logger.log(`Closing voting for battle ${battleId}. Yellow: ${battle.yellowVotes}, Purple: ${battle.purpleVotes}.`);
 
     return this.prisma.battle.update({
       where: { id: battleId },
-      data: { votingOpen: false, active: false, winnerId },
-      include: { yellowContestant: true, purpleContestant: true, winner: true },
+      data: { votingOpen: false },
+      include: { yellowContestant: true, purpleContestant: true },
     });
   }
 
@@ -74,12 +72,23 @@ export class BattlesService {
   async announce(battleId: number) {
     const battle = await this.prisma.battle.findUnique({
       where: { id: battleId },
-      include: { yellowContestant: true, purpleContestant: true, winner: true },
+      include: { yellowContestant: true, purpleContestant: true },
     });
     if (!battle) throw new NotFoundException('Battle not found');
     if (battle.votingOpen) throw new BadRequestException('Voting is still open');
 
-    const isTie = battle.winnerId === null;
+    const winnerId = battle.yellowVotes > battle.purpleVotes
+      ? battle.yellowContestantId
+      : battle.yellowVotes < battle.purpleVotes
+        ? battle.purpleContestantId
+        : null;
+
+    const isTie = winnerId === null;
+
+    await this.prisma.battle.update({
+      where: { id: battleId },
+      data: { winnerId },
+    });
 
     if (isTie) {
       this.gateway.emitTie({
@@ -88,6 +97,10 @@ export class BattlesService {
         purple: battle.purpleContestant!.name,
       });
     } else {
+      const winnerName = winnerId === battle.yellowContestantId
+        ? battle.yellowContestant!.name
+        : battle.purpleContestant!.name;
+
       await this.advanceWinner(
         battle.eventId,
         battle.group,
@@ -99,11 +112,18 @@ export class BattlesService {
       this.gateway.emitBattleWinner({
         battleId: battle.id,
         winnerId: battle.winnerId!,
-        winnerName: battle.winner!.name,
+        winnerName: winnerName,
         yellowVotes: battle.yellowVotes,
         purpleVotes: battle.purpleVotes,
       });
     }
+
+    this.logger.log(`Announcing result for battle ${battleId}. Winner ID: ${battle.winnerId}, Tie: ${isTie}`);
+
+    await this.prisma.battle.update({
+      where: { id: battleId },
+      data: { active: false },
+    });
 
     return battle;
   }
@@ -118,7 +138,7 @@ export class BattlesService {
     const [updated] = await this.prisma.$transaction([
       this.prisma.battle.update({
         where: { id: battleId },
-        data: { yellowVotes: 0, purpleVotes: 0 },
+        data: { yellowVotes: 0, purpleVotes: 0, active: true },
         include: { yellowContestant: true, purpleContestant: true },
       }),
       this.prisma.voteSession.deleteMany({ where: { battleId } }),
@@ -129,6 +149,8 @@ export class BattlesService {
       yellow: updated.yellowContestant!.name,
       purple: updated.purpleContestant!.name,
     });
+
+    this.logger.log(`Rerunning battle ${battleId} due to tie. Votes reset.`);
 
     return updated;
   }
