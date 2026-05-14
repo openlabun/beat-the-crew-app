@@ -5,6 +5,7 @@ import { BattlesGateway } from './battles.gateway';
 @Injectable()
 export class BattlesService {
   private readonly logger = new Logger(BattlesService.name);
+  private activeTimers = new Map<number, NodeJS.Timeout>()
   constructor(
     private readonly prisma: PrismaService,
     private readonly gateway: BattlesGateway,
@@ -44,6 +45,24 @@ export class BattlesService {
       yellow: updated.yellowContestant!.name,
       purple: updated.purpleContestant!.name,
     });
+
+    // Countdown ticker
+    let secondsLeft = 60
+    const ticker = setInterval(async () => {
+      secondsLeft--
+      this.gateway.emitVotingTick({ battleId, secondsLeft })
+
+      if (secondsLeft <= 0) {
+        clearInterval(ticker)
+        const current = await this.prisma.battle.findUnique({ where: { id: battleId } })
+        if (current?.votingOpen) {
+          await this.closeVoting(battleId)
+        }
+      }
+    }, 1000)
+
+    // Store ticker so manual close can cancel it
+    this.activeTimers.set(battleId, ticker)
 
     return updated;
   }

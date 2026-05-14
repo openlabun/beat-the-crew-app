@@ -58,4 +58,8 @@ export class BattlesGateway implements OnGatewayConnection, OnGatewayDisconnect 
     this.logger.log(`Votes updated for battle: ${payload.battleId}`);
     this.server.emit('votes:updated', payload);
   }
+
+  emitVotingTick(payload: { battleId: number; secondsLeft: number }) {
+    this.server.emit('voting:tick', payload)
+  }
 }
