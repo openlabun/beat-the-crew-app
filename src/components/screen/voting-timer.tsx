@@ -9,8 +9,9 @@ interface VotingTimerProps {
 }
 
 export function VotingTimer({ secondsLeft, yellow, purple }: VotingTimerProps) {
+  const TIMER_DURATION = 30
   const [displaySeconds, setDisplaySeconds] = useState(secondsLeft)
-  const [smoothProgress, setSmoothProgress] = useState(secondsLeft / 60)
+  const [smoothProgress, setSmoothProgress] = useState(secondsLeft / TIMER_DURATION)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const isDone = secondsLeft <= 0
 
@@ -24,13 +25,13 @@ export function VotingTimer({ secondsLeft, yellow, purple }: VotingTimerProps) {
     }
 
     setDisplaySeconds(secondsLeft)
-    setSmoothProgress(secondsLeft / 60)
+    setSmoothProgress(secondsLeft / TIMER_DURATION)
 
     if (intervalRef.current) clearInterval(intervalRef.current)
 
     let elapsed = 0
-    const startProgress = secondsLeft / 60
-    const endProgress = (secondsLeft - 1) / 60
+    const startProgress = secondsLeft / TIMER_DURATION
+    const endProgress = (secondsLeft - 1) / TIMER_DURATION
 
     intervalRef.current = setInterval(() => {
       elapsed += 50

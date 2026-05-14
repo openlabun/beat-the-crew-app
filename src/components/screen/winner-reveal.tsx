@@ -9,15 +9,9 @@ interface WinnerRevealProps {
 }
 
 export function WinnerReveal({ winnerName, yellowVotes, purpleVotes }: WinnerRevealProps) {
-  const [showStats, setShowStats] = useState(false)
   const total = yellowVotes + purpleVotes
   const yellowPercent = total > 0 ? Math.round((yellowVotes / total) * 100) : 50
   const purplePercent = total > 0 ? Math.round((purpleVotes / total) * 100) : 50
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowStats(true), 2000)
-    return () => clearTimeout(timer)
-  }, [])
 
   return (
     <div className="min-h-screen w-full bg-btc-dark flex flex-col items-center justify-center relative overflow-hidden">
@@ -53,33 +47,6 @@ export function WinnerReveal({ winnerName, yellowVotes, purpleVotes }: WinnerRev
         >
           {winnerName}
         </h1>
-
-        {/* Vote statistics */}
-        {showStats && (
-          <div className="w-full max-w-2xl space-y-4 mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Vote bar */}
-            <div className="flex h-16 rounded-xl overflow-hidden shadow-2xl">
-              <div
-                className="bg-btc-yellow flex items-center justify-center transition-all duration-1000"
-                style={{ width: `${yellowPercent}%` }}
-              >
-                <span className="text-btc-dark font-black text-2xl">{yellowPercent}%</span>
-              </div>
-              <div
-                className="bg-btc-purple flex items-center justify-center transition-all duration-1000"
-                style={{ width: `${purplePercent}%` }}
-              >
-                <span className="text-foreground font-black text-2xl">{purplePercent}%</span>
-              </div>
-            </div>
-            
-            {/* Vote counts */}
-            <div className="flex justify-between text-xl text-muted-foreground px-4">
-              <span className="text-btc-yellow font-bold">{yellowVotes} votos</span>
-              <span className="text-btc-purple font-bold">{purpleVotes} votos</span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
