@@ -47,7 +47,7 @@ export class BattlesService {
     });
 
     // Countdown ticker
-    let secondsLeft = 60
+    let secondsLeft = 30
     const ticker = setInterval(async () => {
       secondsLeft--
       this.gateway.emitVotingTick({ battleId, secondsLeft })
