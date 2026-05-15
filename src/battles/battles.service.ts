@@ -232,11 +232,18 @@ export class BattlesService {
       include: { yellowContestant: true, purpleContestant: true },
     });
     if (!battle) throw new NotFoundException('Battle not found');
-    if (battle.votingOpen) throw new BadRequestException('Close voting before forfeiting');
     if (battle.winnerId) throw new BadRequestException('Battle already has a winner');
-
     if (!battle.yellowContestantId || !battle.purpleContestantId) {
       throw new BadRequestException('Battle does not have two contestants yet');
+    }
+
+    // If voting is open, close it first before forfeiting
+    if (battle.votingOpen) {
+      const existingTimer = this.activeTimers.get(battleId)
+      if (existingTimer) {
+        clearInterval(existingTimer)
+        this.activeTimers.delete(battleId)
+      }
     }
 
     const winnerId = side === 'yellow'
