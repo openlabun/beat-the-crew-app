@@ -9,11 +9,15 @@ RUN pnpm install
 
 COPY --chown=node:node . .
 
+RUN pnpm exec prisma generate
 RUN chown -R node:node /app
 
 USER node
 
 EXPOSE 3000
+
+FROM development AS builder
+RUN pnpm run build
 
 FROM node:lts-alpine AS production
 WORKDIR /app
@@ -31,6 +35,8 @@ COPY --chown=node:node prisma ./prisma
 RUN pnpm exec prisma generate
 
 COPY --chown=node:node . .
+
+COPY --chown=node:node --from=builder /app/dist ./dist
 
 RUN addgroup -S nodejs && \
     adduser -S nestjs -G nodejs && \
