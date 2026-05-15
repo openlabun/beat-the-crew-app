@@ -32,7 +32,7 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
-    command: sh -c "node dist/main"
+    command: sh -c "pnpm exec prisma migrate deploy && node dist/main"
 
   frontend:
     build:
