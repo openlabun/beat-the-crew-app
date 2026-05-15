@@ -87,6 +87,12 @@ export class BattlesController {
   @Patch(':id/forfeit')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Forfeit a battle on behalf of one side — emits battle:forfeit to all clients' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiQuery({ name: 'side', enum: ['yellow', 'purple'] })
+  @ApiResponse({ status: 200, description: 'Battle forfeited, winner announced' })
+  @ApiResponse({ status: 400, description: 'Battle already has a winner or voting is still open' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   forfeit(
     @Param('id', ParseIntPipe) id: number,
     @Query('side') side: 'yellow' | 'purple',
