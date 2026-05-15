@@ -163,10 +163,10 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   }
 
-  const handleForfeit = async (side: "yellow" | "purple") => {
-    if (!activeBattle || !eventId) return
+  const handleForfeit = async (battleId: number, side: "yellow" | "purple") => {
+    if (!eventId) return
     try {
-      await forfeitBattle(activeBattle.id, side)
+      await forfeitBattle(battleId, side)
       await loadEventData(eventId)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to forfeit battle")
@@ -252,7 +252,6 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
               onCloseVoting={handleCloseVoting}
               onAnnounceResult={handleAnnounceResult}
               onRerun={handleRerun}
-              onForfeit={handleForfeit}
             />
 
             {/* Real-time Results */}
@@ -270,6 +269,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
               onSelectBattle={handleOpenVoting}
               activeBattleId={activeBattle?.id || null}
               onRefresh={() => eventId && loadEventData(eventId)}
+              onForfeit={handleForfeit}
             />
           </>
         )}

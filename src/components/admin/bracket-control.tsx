@@ -15,6 +15,7 @@ interface BracketControlProps {
   onSelectBattle: (battleId: number) => void
   activeBattleId: number | null
   onRefresh: () => void
+  onForfeit: (battleId: number, side: 'yellow' | 'purple') => void
 }
 
 // Helper to get round name
@@ -40,15 +41,17 @@ interface BattleRowProps {
   roundName: string
   isActive: boolean
   onSelect: () => void
+  onForfeit: (battleId: number, side: 'yellow' | 'purple') => void
 }
 
-function BattleRow({ battle, index, roundName, isActive, onSelect }: BattleRowProps) {
+function BattleRow({ battle, index, roundName, isActive, onSelect, onForfeit }: BattleRowProps) {
   const yellowName = battle.yellowContestant?.name || "TBD"
   const purpleName = battle.purpleContestant?.name || "TBD"
   const winnerId = battle.winnerId
   const hasWinner = winnerId !== null
   const isYellowWinner = winnerId === battle.yellowContestantId
   const canStartVoting = battle.yellowContestantId && battle.purpleContestantId && !hasWinner
+  const canForfeit = battle.yellowContestantId && battle.purpleContestantId && !hasWinner
 
   return (
     <div
@@ -107,6 +110,28 @@ function BattleRow({ battle, index, roundName, isActive, onSelect }: BattleRowPr
       ) : (
         <span className="text-xs text-muted-foreground w-24 text-right">Pendiente</span>
       )}
+
+      {/* Forfeit row — only show if battle can still be forfeited */}
+      {canForfeit && (
+        <div className="flex gap-2 pl-9">
+          <button
+            onClick={() => {
+              if (confirm(`¿${yellowName} se retira?`)) onForfeit(battle.id, 'yellow')
+            }}
+            className="flex-1 text-xs py-1 rounded border border-btc-yellow/20 text-btc-yellow/50 hover:border-btc-yellow/60 hover:text-btc-yellow transition-colors"
+          >
+            {yellowName} se retira
+          </button>
+          <button
+            onClick={() => {
+              if (confirm(`¿${purpleName} se retira?`)) onForfeit(battle.id, 'purple')
+            }}
+            className="flex-1 text-xs py-1 rounded border border-btc-purple/20 text-btc-purple/50 hover:border-btc-purple/60 hover:text-btc-purple transition-colors"
+          >
+            {purpleName} se retira
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -119,6 +144,7 @@ export function BracketControl({
   onSelectBattle,
   activeBattleId,
   onRefresh,
+  onForfeit
 }: BracketControlProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isReshuffling, setIsReshuffling] = useState(false)
@@ -262,6 +288,7 @@ export function BracketControl({
                   roundName={getRoundName(battle.round, totalRounds)}
                   isActive={battle.id === activeBattleId}
                   onSelect={() => onSelectBattle(battle.id)}
+                  onForfeit={onForfeit}
                 />
               ))}
           </div>
