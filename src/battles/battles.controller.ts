@@ -16,6 +16,13 @@ export class BattlesController {
     return this.battlesService.getActiveBattle(eventId);
   }
 
+  @Get('current')
+  @ApiOperation({ summary: 'Get the most recently created active battle across all events' })
+  @ApiResponse({ status: 200, description: 'Returns the current battle or null' })
+  getCurrentBattle() {
+    return this.battlesService.getCurrentBattle()
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a battle by ID' })
   @ApiParam({ name: 'id', type: Number })

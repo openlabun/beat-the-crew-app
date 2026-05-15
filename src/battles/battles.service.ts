@@ -20,6 +20,14 @@ export class BattlesService {
     return battle;
   }
 
+  async getCurrentBattle() {
+    return this.prisma.battle.findFirst({
+      where: { active: true },
+      orderBy: { createdAt: 'desc' },
+      include: { yellowContestant: true, purpleContestant: true },
+    })
+  }
+
   async openVoting(battleId: number) {
     const battle = await this.prisma.battle.findUnique({ where: { id: battleId } });
     if (!battle) throw new NotFoundException('Battle not found');
