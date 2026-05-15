@@ -91,23 +91,12 @@ export class BattlesService {
   async announce(battleId: number) {
     const battle = await this.prisma.battle.findUnique({
       where: { id: battleId },
-      include: { yellowContestant: true, purpleContestant: true },
+      include: { yellowContestant: true, purpleContestant: true, winner: true },
     });
     if (!battle) throw new NotFoundException('Battle not found');
     if (battle.votingOpen) throw new BadRequestException('Voting is still open');
 
-    const winnerId = battle.yellowVotes > battle.purpleVotes
-      ? battle.yellowContestantId
-      : battle.yellowVotes < battle.purpleVotes
-        ? battle.purpleContestantId
-        : null;
-
-    const isTie = winnerId === null;
-
-    await this.prisma.battle.update({
-      where: { id: battleId },
-      data: { winnerId },
-    });
+    const isTie = battle.yellowVotes === battle.purpleVotes;
 
     if (isTie) {
       this.gateway.emitTie({
@@ -115,36 +104,39 @@ export class BattlesService {
         yellow: battle.yellowContestant!.name,
         purple: battle.purpleContestant!.name,
       });
-    } else {
-      const winnerName = winnerId === battle.yellowContestantId
-        ? battle.yellowContestant!.name
-        : battle.purpleContestant!.name;
-
-      await this.advanceWinner(
-        battle.eventId,
-        battle.group,
-        battle.round,
-        battle.position,
-        battle.winnerId!,
-      );
-
-      this.gateway.emitBattleWinner({
-        battleId: battle.id,
-        winnerId: battle.winnerId!,
-        winnerName: winnerName,
-        yellowVotes: battle.yellowVotes,
-        purpleVotes: battle.purpleVotes,
-      });
+      return battle;
     }
 
-    this.logger.log(`Announcing result for battle ${battleId}. Winner ID: ${battle.winnerId}, Tie: ${isTie}`);
+    // Determine winner from votes
+    const winnerId = battle.yellowVotes > battle.purpleVotes
+      ? battle.yellowContestantId!
+      : battle.purpleContestantId!;
 
-    await this.prisma.battle.update({
+    // Set winner and clear active
+    const updated = await this.prisma.battle.update({
       where: { id: battleId },
-      data: { active: false },
+      data: { winnerId, active: false },
+      include: { yellowContestant: true, purpleContestant: true, winner: true },
     });
 
-    return battle;
+    // Advance winner to next battle
+    await this.advanceWinner(
+      battle.eventId,
+      battle.group,
+      battle.round,
+      battle.position,
+      winnerId,
+    );
+
+    this.gateway.emitBattleWinner({
+      battleId: battle.id,
+      winnerId,
+      winnerName: updated.winner!.name,
+      yellowVotes: battle.yellowVotes,
+      purpleVotes: battle.purpleVotes,
+    });
+
+    return updated;
   }
 
   // Admin hits this after hyping up the tie — resets battle for another round
@@ -157,7 +149,7 @@ export class BattlesService {
     const [updated] = await this.prisma.$transaction([
       this.prisma.battle.update({
         where: { id: battleId },
-        data: { yellowVotes: 0, purpleVotes: 0, active: true },
+        data: { yellowVotes: 0, purpleVotes: 0, active: false },
         include: { yellowContestant: true, purpleContestant: true },
       }),
       this.prisma.voteSession.deleteMany({ where: { battleId } }),
