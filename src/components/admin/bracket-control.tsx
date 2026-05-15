@@ -5,7 +5,7 @@ import { ContestantGroup, type Battle } from "@/lib/types"
 import { generateBracket, reshuffleBracket } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RefreshCw, Shuffle } from "lucide-react"
+import { Flag, RefreshCw, Shuffle } from "lucide-react"
 
 interface BracketControlProps {
   eventId: number | null
@@ -56,7 +56,7 @@ function BattleRow({ battle, index, roundName, isActive, onSelect, onForfeit }: 
   return (
     <div
       className={`flex items-center gap-3 p-3 rounded-lg ${
-        isActive ? "bg-btc-purple/20 border border-btc-purple" : "bg-btc-dark"
+      isActive ? "bg-btc-purple/20 border border-btc-purple" : "bg-btc-dark"
       }`}
     >
       {/* Position number */}
@@ -64,15 +64,26 @@ function BattleRow({ battle, index, roundName, isActive, onSelect, onForfeit }: 
 
       {/* Yellow contestant */}
       <div
-        className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold uppercase ${
-          hasWinner
-            ? isYellowWinner
-              ? "bg-btc-yellow text-btc-dark"
-              : "bg-btc-yellow/20 text-btc-yellow/50"
-            : "bg-btc-yellow/30 text-btc-yellow"
-        }`}
+      className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold uppercase relative group ${
+        hasWinner
+        ? isYellowWinner
+          ? "bg-btc-yellow text-btc-dark"
+          : "bg-btc-yellow/20 text-btc-yellow/50"
+        : "bg-btc-yellow/30 text-btc-yellow"
+      }`}
       >
-        {yellowName}
+      {yellowName}
+      {canForfeit && (
+        <button
+        onClick={() => {
+          if (confirm(`¿${yellowName} se retira?`)) onForfeit(battle.id, 'yellow')
+        }}
+        className="absolute right-2 top-1/2 -translate-y-1/2 opacity-30 hover:opacity-100 transition-all duration-200 hover:scale-120"
+        title={`Retirar a ${yellowName}`}
+        >
+        <Flag className="w-4 h-4" />
+        </button>
+      )}
       </div>
 
       {/* VS */}
@@ -80,57 +91,46 @@ function BattleRow({ battle, index, roundName, isActive, onSelect, onForfeit }: 
 
       {/* Purple contestant */}
       <div
-        className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold uppercase ${
-          hasWinner
-            ? !isYellowWinner
-              ? "bg-btc-purple text-foreground"
-              : "bg-btc-purple/20 text-btc-purple/50"
-            : "bg-btc-purple/30 text-btc-purple"
-        }`}
+      className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold uppercase relative group ${
+        hasWinner
+        ? !isYellowWinner
+          ? "bg-btc-purple text-foreground"
+          : "bg-btc-purple/20 text-btc-purple/50"
+        : "bg-btc-purple/30 text-btc-purple"
+      }`}
       >
-        {purpleName}
+      {purpleName}
+      {canForfeit && (
+        <button
+        onClick={() => {
+          if (confirm(`¿${purpleName} se retira?`)) onForfeit(battle.id, 'purple')
+        }}
+        className="absolute right-2 top-1/2 -translate-y-1/2 hover:opacity-100 transition-all duration-200 hover:scale-120"
+        title={`Retirar a ${purpleName}`}
+        >
+        <Flag className="w-4 h-4" />
+        </button>
+      )}
       </div>
 
       {/* Winner indicator or action button */}
       {hasWinner ? (
-        <span className="text-xs text-muted-foreground w-24 text-right">
-          {"✓ "}
-          {isYellowWinner ? yellowName : purpleName}
-        </span>
+      <span className="text-xs text-muted-foreground w-24 text-right">
+        {"✓ "}
+        {isYellowWinner ? yellowName : purpleName}
+      </span>
       ) : canStartVoting ? (
-        <Button
-          onClick={onSelect}
-          disabled={isActive}
-          size="sm"
-          variant="ghost"
-          className="text-xs text-btc-yellow hover:text-btc-dark hover:bg-btc-yellow w-24"
-        >
-          {isActive ? "En curso" : "Iniciar"}
-        </Button>
+      <Button
+        onClick={onSelect}
+        disabled={isActive}
+        size="sm"
+        variant="ghost"
+        className="text-xs text-btc-yellow hover:text-btc-dark hover:bg-btc-yellow w-24"
+      >
+        {isActive ? "En curso" : "Iniciar"}
+      </Button>
       ) : (
-        <span className="text-xs text-muted-foreground w-24 text-right">Pendiente</span>
-      )}
-
-      {/* Forfeit row — only show if battle can still be forfeited */}
-      {canForfeit && (
-        <div className="flex gap-2 pl-9">
-          <button
-            onClick={() => {
-              if (confirm(`¿${yellowName} se retira?`)) onForfeit(battle.id, 'yellow')
-            }}
-            className="flex-1 text-xs py-1 rounded border border-btc-yellow/20 text-btc-yellow/50 hover:border-btc-yellow/60 hover:text-btc-yellow transition-colors"
-          >
-            {yellowName} se retira
-          </button>
-          <button
-            onClick={() => {
-              if (confirm(`¿${purpleName} se retira?`)) onForfeit(battle.id, 'purple')
-            }}
-            className="flex-1 text-xs py-1 rounded border border-btc-purple/20 text-btc-purple/50 hover:border-btc-purple/60 hover:text-btc-purple transition-colors"
-          >
-            {purpleName} se retira
-          </button>
-        </div>
+      <span className="text-xs text-muted-foreground w-24 text-right">Pendiente</span>
       )}
     </div>
   )
