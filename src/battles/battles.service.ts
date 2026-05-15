@@ -213,4 +213,48 @@ export class BattlesService {
     if (!battle) throw new NotFoundException('Battle not found');
     return battle;
   }
+
+  async forfeit(battleId: number, side: 'yellow' | 'purple') {
+    const battle = await this.prisma.battle.findUnique({
+      where: { id: battleId },
+      include: { yellowContestant: true, purpleContestant: true },
+    });
+    if (!battle) throw new NotFoundException('Battle not found');
+    if (battle.votingOpen) throw new BadRequestException('Close voting before forfeiting');
+    if (battle.winnerId) throw new BadRequestException('Battle already has a winner');
+
+    if (!battle.yellowContestantId || !battle.purpleContestantId) {
+      throw new BadRequestException('Battle does not have two contestants yet');
+    }
+
+    const winnerId = side === 'yellow'
+      ? battle.purpleContestantId
+      : battle.yellowContestantId;
+
+    const forfeitingName = side === 'yellow'
+      ? battle.yellowContestant!.name
+      : battle.purpleContestant!.name;
+
+    const winnerName = side === 'yellow'
+      ? battle.purpleContestant!.name
+      : battle.yellowContestant!.name;
+
+    const updated = await this.prisma.battle.update({
+      where: { id: battleId },
+      data: { winnerId, active: false, votingOpen: false },
+      include: { yellowContestant: true, purpleContestant: true, winner: true },
+    });
+
+    await this.advanceWinner(
+      battle.eventId,
+      battle.group,
+      battle.round,
+      battle.position,
+      winnerId,
+    );
+
+    this.gateway.emitForfeit({ battleId, forfeitingName, winnerName });
+    this.logger.log(`Battle ${battleId} forfeited by ${forfeitingName}. Winner: ${winnerName}.`);
+    return updated;
+  }
 }

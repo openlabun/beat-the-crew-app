@@ -83,4 +83,14 @@ export class BattlesController {
   getLiveTally(@Param('id', ParseIntPipe) id: number) {
     return this.battlesService.getLiveTally(id);
   }
+
+  @Patch(':id/forfeit')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  forfeit(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('side') side: 'yellow' | 'purple',
+  ) {
+    return this.battlesService.forfeit(id, side)
+  }
 }

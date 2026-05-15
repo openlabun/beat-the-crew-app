@@ -62,4 +62,8 @@ export class BattlesGateway implements OnGatewayConnection, OnGatewayDisconnect 
   emitVotingTick(payload: { battleId: number; secondsLeft: number }) {
     this.server.emit('voting:tick', payload)
   }
+
+  emitForfeit(payload: { battleId: number; forfeitingName: string; winnerName: string }) {
+    this.server.emit('battle:forfeit', payload);
+  }
 }
