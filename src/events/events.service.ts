@@ -16,6 +16,15 @@ export class EventsService {
     });
   }
 
+  getEvents() {
+    return this.prisma.event.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: { select: { contestants: true, battles: true } }
+      }
+    });
+  }
+
   async getEvent(eventId: number) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },

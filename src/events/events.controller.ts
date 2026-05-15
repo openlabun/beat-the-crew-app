@@ -21,6 +21,13 @@ export class EventsController {
     return this.eventsService.createEvent(dto);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Get all events with contestant and battle counts' })
+  @ApiResponse({ status: 200, description: 'Returns a list of events' })
+  getEvents() {
+    return this.eventsService.getEvents()
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get an event by ID including contestants and battles' })
   @ApiParam({ name: 'id', type: Number })
