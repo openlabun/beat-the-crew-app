@@ -43,9 +43,7 @@ services:
     env_file:
       - .env
     environment:
-      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:3000}
       NODE_ENV: production
-      PORT: 3001
     ports:
       - "3001:3001"
     depends_on:
