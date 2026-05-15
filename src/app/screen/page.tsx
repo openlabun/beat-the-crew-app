@@ -38,7 +38,6 @@ function ScreenApp() {
   })
   const { isConnected } = useSocket()
   const [currentMode, setCurrentMode] = useState<ScreenMode>('logo')
-  const [prevMode, setPrevMode] = useState<ScreenMode | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
   const searchParams = useSearchParams()
@@ -51,7 +50,6 @@ function ScreenApp() {
     // Change content halfway through the wipe animation (300ms out of 600ms)
     setTimeout(() => {
       setCurrentMode(newMode)
-      setPrevMode(null)
     }, 300)
     
     // Finish transitioning after animation completes
@@ -104,7 +102,6 @@ function ScreenApp() {
   }, [switchMode])
 
   const handleBattleRerun = useCallback(() => {
-    setState((prev) => ({ ...prev, mode: "bracket" }))
     switchMode("bracket")
     loadData(eventId, state.group)
   }, [loadData, switchMode, eventId, state.group])
@@ -124,10 +121,8 @@ function ScreenApp() {
   const handleScreenCommand = useCallback((command: string) => {
     if (command === "show_bracket") {
       switchMode("bracket")
-      setState((prev) => ({ ...prev, mode: "bracket" }))
     } else if (command === "show_logo") {
       switchMode("logo")
-      setState((prev) => ({ ...prev, mode: "logo" }))
     }
   }, [switchMode])
 
