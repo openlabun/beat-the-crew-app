@@ -10,6 +10,7 @@ import { WinnerReveal } from "@/components/screen/winner-reveal"
 import { TieReveal } from "@/components/screen/tie-reveal"
 import { VotingTimer } from "@/components/screen/voting-timer"
 import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 
 type ScreenMode = "logo" | "bracket" | "winner" | "tie" | "timer"
 
@@ -191,10 +192,21 @@ function ModeContent({ mode, state, secondsLeft }: { mode: ScreenMode, state: Sc
   }
 }
 
+function ScreenLoading() {
+  return (
+    <main className="min-h-screen w-full bg-btc-dark flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-btc-yellow border-t-transparent rounded-full animate-spin" />
+    </main>
+  )
+}
+
+
 export default function ScreenPage() {
   return (
-    <SocketProvider>
-      <ScreenApp />
-    </SocketProvider>
+    <Suspense fallback={<ScreenLoading />}>
+      <SocketProvider>
+        <ScreenApp />
+      </SocketProvider>
+    </Suspense>
   )
 }
