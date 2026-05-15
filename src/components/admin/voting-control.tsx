@@ -19,6 +19,7 @@ export function VotingControl({
   onCloseVoting,
   onAnnounceResult,
   onRerun,
+  onForfeit,
 }: VotingControlProps) {
   const yellowName = activeBattle?.yellowContestant?.name || "Amarillo"
   const purpleName = activeBattle?.purpleContestant?.name || "Morado"
@@ -89,6 +90,33 @@ export function VotingControl({
           >
             Repetir Batalla (Empate)
           </Button>
+        )}
+
+        {/* Forfeit buttons */}
+        {activeBattle && !isVotingOpen && (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Forfeit</p>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  if (confirm(`¿Confirmar forfeit de ${yellowName}?`)) onForfeit('yellow')
+                }}
+                variant="outline"
+                className="flex-1 border-btc-yellow/30 text-btc-yellow/70 hover:bg-btc-yellow/10 hover:border-btc-yellow text-xs"
+              >
+                ¿{yellowName} se retira?
+              </Button>
+              <Button
+                onClick={() => {
+                  if (confirm(`¿Confirmar forfeit de ${purpleName}?`)) onForfeit('purple')
+                }}
+                variant="outline"
+                className="flex-1 border-btc-purple/30 text-btc-purple/70 hover:bg-btc-purple/10 hover:border-btc-purple text-xs"
+              >
+                ¿{purpleName} se retira?
+              </Button>
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
