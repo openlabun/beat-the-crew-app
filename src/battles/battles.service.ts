@@ -29,6 +29,10 @@ export class BattlesService {
   }
 
   async openVoting(battleId: number) {
+    // Clear any existing timer for any battle first
+    this.activeTimers.forEach((timer) => clearInterval(timer))
+    this.activeTimers.clear()
+
     const battle = await this.prisma.battle.findUnique({ where: { id: battleId } });
     if (!battle) throw new NotFoundException('Battle not found');
 
