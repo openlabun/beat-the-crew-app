@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model Event {
+  id          Int          @id @default(autoincrement())
+  name        String
+  createdAt   DateTime     @default(now())
+
+  contestants Contestant[]
+  battles     Battle[]
+}
+
+enum ContestantGroup {
+  CREW
+  INVITED
+}
+
+model Contestant {
+  id              Int             @id @default(autoincrement())
+  name            String
+  group           ContestantGroup
+  eventId         Int
+  seed            Int?
+  createdAt       DateTime        @default(now())
+
+  event           Event           @relation(fields: [eventId], references: [id])
+  battlesAsYellow Battle[]        @relation("YellowContestant")
+  battlesAsPurple Battle[]        @relation("PurpleContestant")
+  winsAsWinner    Battle[]        @relation("BattleWinner")
+
+  @@unique([eventId, group, seed])
+  @@index([eventId, group])
+}
+
+model Battle {
+  id                 Int             @id @default(autoincrement())
+  eventId            Int
+  group              ContestantGroup
+  round              Int
+  position           Int
+  active             Boolean         @default(false)
+  votingOpen         Boolean         @default(false)
+  yellowVotes        Int             @default(0)
+  purpleVotes        Int             @default(0)
+  yellowContestantId Int?
+  purpleContestantId Int?
+  winnerId           Int?
+  createdAt          DateTime        @default(now())
+
+  event              Event           @relation(fields: [eventId], references: [id])
+  yellowContestant   Contestant?     @relation("YellowContestant", fields: [yellowContestantId], references: [id])
+  purpleContestant   Contestant?     @relation("PurpleContestant", fields: [purpleContestantId], references: [id])
+  winner             Contestant?     @relation("BattleWinner", fields: [winnerId], references: [id])
+  voteSessions       VoteSession[]
+
+  @@unique([eventId, group, round, position])
+  @@index([eventId, group])
+}
+
+model VoteSession {
+  id        Int        @id @default(autoincrement())
+  battleId  Int
+  userId    String
+  votedFor  VoteChoice
+  createdAt DateTime   @default(now())
+
+  battle    Battle     @relation(fields: [battleId], references: [id])
+
+  @@unique([battleId, userId])
+}
+
+enum VoteChoice {
+  YELLOW
+  PURPLE
+}
