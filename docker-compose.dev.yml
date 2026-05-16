@@ -50,7 +50,6 @@ services:
     env_file:
       - .env
     environment:
-      NEXT_PUBLIC_BACKEND_URL: http://localhost:3000
       CI: "true"
       CHOKIDAR_USEPOLLING: true
       WATCHPACK_POLLING: true
