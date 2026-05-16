@@ -41,11 +41,12 @@ COPY --chown=node:node --from=builder /app/dist ./dist
 RUN addgroup -S nodejs && \
     adduser -S nestjs -G nodejs && \
     chown -R nestjs:nodejs /app
+    
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 USER nestjs
 
 EXPOSE 3000
 
-COPY entrypoint.sh ./entrypoint.sh
-RUN chmod +x entrypoint.sh
-CMD ["./entrypoint.sh"]
+CMD ["dumb-init", "./entrypoint.sh"]
