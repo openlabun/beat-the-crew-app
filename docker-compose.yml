@@ -24,7 +24,6 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-beat-the-crew}
       NODE_ENV: production
     ports:
       - "3000:3000"
