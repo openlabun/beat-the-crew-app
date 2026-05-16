@@ -1,6 +1,6 @@
 import type { Battle, Event, VoteTally, ContestantGroup, VoteChoice, Contestant } from "./types"
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://beat-the-crew-production.up.railway.app/"
 
 // Helper to get auth header
 function getAuthHeader(): HeadersInit {
