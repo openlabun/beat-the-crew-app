@@ -46,4 +46,6 @@ USER nestjs
 
 EXPOSE 3000
 
-CMD ["dumb-init", "node", "dist/main"]
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh
+CMD ["./entrypoint.sh"]
