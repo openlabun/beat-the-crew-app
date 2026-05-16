@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: '*', // TODO: Update this to restrict origins in production
+    origin: process.env.FRONTEND_URL,
   });
  
   app.useGlobalPipes(
@@ -37,6 +37,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
   app.use(cookieParser());
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.BACKEND_PORT ?? 3000);
 }
 bootstrap();

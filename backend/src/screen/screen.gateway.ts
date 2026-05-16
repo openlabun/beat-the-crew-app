@@ -11,7 +11,7 @@ import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
-  cors: { origin: '*' }, // tighten to your frontend URL in production
+  cors: { origin: process.env.FRONTEND_URL },
 })
 export class ScreenGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(ScreenGateway.name);
