@@ -2,7 +2,7 @@
 set -e
 
 echo "Running Prisma migrations..."
-pnpm exec prisma migrate deploy
+npx prisma migrate deploy
 
 echo "Starting server..."
-exec node dist/main
+exec dumb-init node dist/main
