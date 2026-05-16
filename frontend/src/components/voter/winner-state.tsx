@@ -45,32 +45,6 @@ export function WinnerState({ battle, winnerId, winnerName, yellowVotes, purpleV
         >
           {winnerName}
         </h1>
-
-        {/* Vote bar */}
-        <div className="w-full max-w-sm space-y-2 mt-8">
-          <div className="flex h-8 rounded-lg overflow-hidden">
-            <div
-              className="bg-btc-yellow flex items-center justify-center transition-all duration-1000"
-              style={{ width: `${yellowPercent}%` }}
-            >
-              {yellowPercent > 15 && (
-                <span className="text-btc-dark font-bold text-sm">{yellowPercent}%</span>
-              )}
-            </div>
-            <div
-              className="bg-btc-purple flex items-center justify-center transition-all duration-1000"
-              style={{ width: `${purplePercent}%` }}
-            >
-              {purplePercent > 15 && (
-                <span className="text-foreground font-bold text-sm">{purplePercent}%</span>
-              )}
-            </div>
-          </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>{yellowVotes} votos</span>
-            <span>{purpleVotes} votos</span>
-          </div>
-        </div>
       </div>
     </div>
   )
