@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, ParseIntPipe, UseGuards, Query, Patch } from '@nestjs/common';
 import { ContestantGroup } from '@prisma/client';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -52,6 +52,21 @@ export class EventsController {
     @Body() dto: AddContestantsDto,
   ) {
     return this.eventsService.addContestants(id, dto);
+  }
+
+  @Patch('contestants/:contestantId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Update a contestant\'s name' })
+  @ApiParam({ name: 'contestantId', type: Number })
+  @ApiResponse({ status: 200, description: 'Contestant updated' })
+  @ApiResponse({ status: 404, description: 'Contestant not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  updateContestant(
+    @Param('contestantId', ParseIntPipe) contestantId: number,
+    @Body() dto: { name: string },
+  ) {
+    return this.eventsService.updateContestant(contestantId, dto);
   }
 
   @Post(':id/generate')

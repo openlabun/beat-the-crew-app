@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ContestantGroup } from '@prisma/client';
 import { CreateEventDto } from './dto/create-event.dto';
 import { AddContestantsDto } from './dto/add-contestants.dto';
+import { UpdateContestantDto } from './dto/update-contestant.dto';
 
 @Injectable()
 export class EventsService {
@@ -56,6 +57,16 @@ export class EventsService {
 
     this.logger.log(`Adding ${data.length} contestants to event ${eventId}, group ${dto.group}`);
     return this.prisma.contestant.createMany({ data });
+  }
+
+  async updateContestant(contestantId: number, dto: UpdateContestantDto) {
+    const contestant = await this.prisma.contestant.findUnique({ where: { id: contestantId } });
+    if (!contestant) throw new NotFoundException('Contestant not found');
+
+    return this.prisma.contestant.update({
+      where: { id: contestantId },
+      data: { name: dto.name },
+    });
   }
 
   async generateBracket(eventId: number, group: ContestantGroup) {
