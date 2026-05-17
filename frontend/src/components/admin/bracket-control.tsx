@@ -5,8 +5,7 @@ import { ContestantGroup, type Battle } from "@/lib/types"
 import { generateBracket, reshuffleBracket } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Flag, RefreshCw, Shuffle } from "lucide-react"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog"
+import { RefreshCw, Shuffle } from "lucide-react"
 import { ForfeitButton } from "../ui/forfeit-button"
 
 interface BracketControlProps {
@@ -18,6 +17,7 @@ interface BracketControlProps {
   activeBattleId: number | null
   onRefresh: () => void
   onForfeit: (battleId: number, side: 'yellow' | 'purple') => void
+  onEditName: (contestantId: number, newName: string) => Promise<void>
 }
 
 // Helper to get round name
@@ -44,9 +44,10 @@ interface BattleRowProps {
   isActive: boolean
   onSelect: () => void
   onForfeit: (battleId: number, side: 'yellow' | 'purple') => void
+  onEditName: (contestantId: number, newName: string) => Promise<void>
 }
 
-function BattleRow({ battle, index, roundName, isActive, onSelect, onForfeit }: BattleRowProps) {
+function BattleRow({ battle, index, roundName, isActive, onSelect, onForfeit, onEditName }: BattleRowProps) {
   const yellowName = battle.yellowContestant?.name || "TBD"
   const purpleName = battle.purpleContestant?.name || "TBD"
   const winnerId = battle.winnerId
@@ -54,6 +55,32 @@ function BattleRow({ battle, index, roundName, isActive, onSelect, onForfeit }: 
   const isYellowWinner = winnerId === battle.yellowContestantId
   const canStartVoting = battle.yellowContestantId && battle.purpleContestantId && !hasWinner
   const canForfeit = battle.yellowContestantId && battle.purpleContestantId && !hasWinner
+
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editingName, setEditingName] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+
+  const startEdit = (contestantId: number, currentName: string) => {
+    setEditingId(contestantId)
+    setEditingName(currentName)
+  }
+
+  const saveEdit = async (contestantId: number) => {
+    if (!editingName.trim()) return
+    setIsSaving(true)
+    try {
+      await onEditName(contestantId, editingName.trim())
+      setEditingId(null)
+      setEditingName('')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditingName('')
+  }
 
   return (
     <div
@@ -65,17 +92,39 @@ function BattleRow({ battle, index, roundName, isActive, onSelect, onForfeit }: 
       <span className="text-muted-foreground text-sm w-6">{index + 1}.</span>
 
       {/* Yellow contestant */}
-      <div
-      className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold uppercase relative group ${
+      <div className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold uppercase relative group ${
         hasWinner
-        ? isYellowWinner
-          ? "bg-btc-yellow text-btc-dark"
-          : "bg-btc-yellow/20 text-btc-yellow/50"
-        : "bg-btc-yellow/30 text-btc-yellow"
-      }`}
-      >
-        {yellowName}
-        {canForfeit && (<ForfeitButton
+          ? isYellowWinner
+            ? "bg-btc-yellow text-btc-dark"
+            : "bg-btc-yellow/20 text-btc-yellow/50"
+          : "bg-btc-yellow/30 text-btc-yellow"
+      }`}>
+        {editingId === battle.yellowContestantId && battle.yellowContestantId ? (
+          <div className="flex gap-1">
+            <input
+              autoFocus
+              value={editingName}
+              onChange={e => setEditingName(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') saveEdit(battle.yellowContestantId!)
+                if (e.key === 'Escape') cancelEdit()
+              }}
+              className="flex-1 bg-black/20 rounded px-1 text-sm focus:outline-none min-w-0"
+              disabled={isSaving}
+            />
+            <button onClick={() => saveEdit(battle.yellowContestantId!)} className="opacity-80 hover:opacity-100 text-xs">✓</button>
+            <button onClick={cancelEdit} className="opacity-50 hover:opacity-100 text-xs">✕</button>
+          </div>
+        ) : (
+          <span
+            onClick={() => battle.yellowContestantId && startEdit(battle.yellowContestantId, yellowName)}
+            className="cursor-pointer hover:opacity-70 transition-opacity"
+          >
+            {yellowName}
+          </span>
+        )}
+        {canForfeit && (
+          <ForfeitButton
             contestantName={yellowName}
             side="yellow"
             battleId={battle.id}
@@ -89,17 +138,39 @@ function BattleRow({ battle, index, roundName, isActive, onSelect, onForfeit }: 
       <span className="text-muted-foreground text-xs">vs</span>
 
       {/* Purple contestant */}
-      <div
-      className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold uppercase relative group ${
+      <div className={`flex-1 px-3 py-1.5 rounded text-sm font-semibold uppercase relative group ${
         hasWinner
-        ? !isYellowWinner
-          ? "bg-btc-purple text-foreground"
-          : "bg-btc-purple/20 text-btc-purple/50"
-        : "bg-btc-purple/30 text-btc-purple"
-      }`}
-      >
-        {purpleName}
-        {canForfeit && (<ForfeitButton
+          ? !isYellowWinner
+            ? "bg-btc-purple text-foreground"
+            : "bg-btc-purple/20 text-btc-purple/50"
+          : "bg-btc-purple/30 text-btc-purple"
+      }`}>
+        {editingId === battle.purpleContestantId && battle.purpleContestantId ? (
+          <div className="flex gap-1">
+            <input
+              autoFocus
+              value={editingName}
+              onChange={e => setEditingName(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') saveEdit(battle.purpleContestantId!)
+                if (e.key === 'Escape') cancelEdit()
+              }}
+              className="flex-1 bg-black/20 rounded px-1 text-sm focus:outline-none min-w-0"
+              disabled={isSaving}
+            />
+            <button onClick={() => saveEdit(battle.purpleContestantId!)} className="opacity-80 hover:opacity-100 text-xs">✓</button>
+            <button onClick={cancelEdit} className="opacity-50 hover:opacity-100 text-xs">✕</button>
+          </div>
+        ) : (
+          <span
+            onClick={() => battle.purpleContestantId && startEdit(battle.purpleContestantId, purpleName)}
+            className="cursor-pointer hover:opacity-70 transition-opacity"
+          >
+            {purpleName}
+          </span>
+        )}
+        {canForfeit && (
+          <ForfeitButton
             contestantName={purpleName}
             side="purple"
             battleId={battle.id}
@@ -140,7 +211,8 @@ export function BracketControl({
   onSelectBattle,
   activeBattleId,
   onRefresh,
-  onForfeit
+  onForfeit,
+  onEditName
 }: BracketControlProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isReshuffling, setIsReshuffling] = useState(false)
@@ -285,6 +357,7 @@ export function BracketControl({
                   isActive={battle.id === activeBattleId}
                   onSelect={() => onSelectBattle(battle.id)}
                   onForfeit={onForfeit}
+                  onEditName={onEditName}
                 />
               ))}
           </div>
