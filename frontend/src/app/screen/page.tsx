@@ -185,7 +185,7 @@ function ModeContent({ mode, state, secondsLeft }: { mode: ScreenMode, state: Sc
     case 'winner':  return state.winnerData ? <WinnerReveal {...state.winnerData} /> : null
     case 'tie':     return <TieReveal />
     case 'timer':   return <VotingTimer
-        secondsLeft={secondsLeft ?? 60}
+        secondsLeft={secondsLeft ?? 30}
         yellow={state.currentYellow ?? ''}
         purple={state.currentPurple ?? ''}
       />
