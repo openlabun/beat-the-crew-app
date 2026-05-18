@@ -26,6 +26,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
+    debugger
     console.log("connecting: " + process.env.NEXT_PUBLIC_API_URL )
     const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
     const socketInstance = io(socketUrl, {
@@ -46,7 +47,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     })
 
     socketInstance.on("connect_error", (error) => {
-      console.log("Socket connection error:", error.message)
+      console.log("connecting: " + process.env.NEXT_PUBLIC_API_URL )
+      console.log("Socket connection errorr:", error.message)
     })
 
     setSocket(socketInstance)
