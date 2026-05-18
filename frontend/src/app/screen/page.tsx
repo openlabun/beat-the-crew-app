@@ -38,27 +38,32 @@ function ScreenApp() {
     battles: [],
     event: null,
   })
-  const { isConnected } = useSocket()
   const [currentMode, setCurrentMode] = useState<ScreenMode>('logo')
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
   const searchParams = useSearchParams()
   const eventId = parseInt(searchParams.get('eventId') || '0')
+  const [frozenState, setFrozenState] = useState<{ mode: ScreenMode, secondsLeft: number | null }>({
+    mode: 'logo',
+    secondsLeft: null
+  })
 
   const switchMode = useCallback((newMode: ScreenMode) => {
     if (newMode === currentMode || isTransitioning) return
-    setIsTransitioning(true)
     
-    // Change content halfway through the wipe animation (300ms out of 600ms)
+    // Freeze current display state before anything changes
+    setFrozenState({ mode: currentMode, secondsLeft })
+    setIsTransitioning(true)
+
     setTimeout(() => {
       setCurrentMode(newMode)
+      setFrozenState({ mode: newMode, secondsLeft: null })
     }, 300)
-    
-    // Finish transitioning after animation completes
+
     setTimeout(() => {
       setIsTransitioning(false)
     }, 600)
-  }, [currentMode, isTransitioning])
+  }, [currentMode, isTransitioning, secondsLeft])
 
   // Load event and bracket data
   const loadData = useCallback(async (id: number, group: ContestantGroup) => {
@@ -166,7 +171,11 @@ function ScreenApp() {
       
       {/* Base content */}
       <div className="absolute inset-0">
-        <ModeContent mode={currentMode} state={state} secondsLeft={secondsLeft} />
+        <ModeContent 
+          mode={isTransitioning ? frozenState.mode : currentMode}
+          state={state} 
+          secondsLeft={isTransitioning ? frozenState.secondsLeft : secondsLeft}
+        />
       </div>
 
       {/* Wipe overlay - purple and yellow stripes */}
