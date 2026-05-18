@@ -84,8 +84,8 @@ function ScreenApp() {
     setSecondsLeft(null)
     setState((prev) => ({
       ...prev,
-      currentYellow: data.yellow.name,
-      currentPurple: data.purple.name,
+      currentYellow: data.yellow,
+      currentPurple: data.purple,
     }))
     setSecondsLeft(30)
     switchMode("timer")

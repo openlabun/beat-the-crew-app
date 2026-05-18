@@ -30,11 +30,12 @@ function VoterApp() {
     setUserId(id)
   }, [])
 
-  // Check for active battle on load
+  // Check for active battle on load and when reconnecting
   useEffect(() => {
+    if (!isConnected) return
     async function checkActiveBattle() {
       try {
-        const battle = await getCurrentBattle()  // ← new endpoint
+        const battle = await getCurrentBattle()
         if (battle && battle.votingOpen) {
           const votedBattles = JSON.parse(localStorage.getItem("btc_voted_battles") || "{}")
           if (votedBattles[battle.id]) {
@@ -46,20 +47,20 @@ function VoterApp() {
       } catch (err) {}
     }
     checkActiveBattle()
-  }, [])
+  }, [isConnected])
 
   // Socket event handlers
-  const handleVotingOpened = useCallback((payload: { battleId: number; yellow: { id: number; name: string }; purple: { id: number; name: string } }) => {
+  const handleVotingOpened = useCallback((payload: { battleId: number; yellow: string; purple: string }) => {
     const battle: Battle = {
       id: payload.battleId,
       round: 0,
       position: 0,
       eventId: 0,
       group: "CREW" as ContestantGroup,
-      yellowContestantId: payload.yellow.id,
-      purpleContestantId: payload.purple.id,
-      yellowContestant: { id: payload.yellow.id, name: payload.yellow.name, group: "CREW" as ContestantGroup, eventId: 0 },
-      purpleContestant: { id: payload.purple.id, name: payload.purple.name, group: "CREW" as ContestantGroup, eventId: 0 },
+      yellowContestantId: 0,
+      purpleContestantId: 0,
+      yellowContestant: { id: 0, name: payload.yellow, group: "CREW" as ContestantGroup, eventId: 0 },
+      purpleContestant: { id: 0, name: payload.purple, group: "CREW" as ContestantGroup, eventId: 0 },
       winnerId: null,
       winner: null,
       votingOpen: true,
@@ -105,7 +106,7 @@ function VoterApp() {
     })
   }, [])
 
-  const handleBattleRerun = useCallback((payload: { battleId: number; yellow: { id: number; name: string }; purple: { id: number; name: string } }) => {
+  const handleBattleRerun = useCallback((payload: { battleId: number; yellow: string; purple: string }) => {
     // Clear the vote for this battle
     const votedBattles = JSON.parse(localStorage.getItem("btc_voted_battles") || "{}")
     delete votedBattles[payload.battleId]
@@ -117,10 +118,10 @@ function VoterApp() {
       position: 0,
       eventId: 0,
       group: "CREW" as ContestantGroup,
-      yellowContestantId: payload.yellow.id,
-      purpleContestantId: payload.purple.id,
-      yellowContestant: { id: payload.yellow.id, name: payload.yellow.name, group: "CREW" as ContestantGroup, eventId: 0 },
-      purpleContestant: { id: payload.purple.id, name: payload.purple.name, group: "CREW" as ContestantGroup, eventId: 0 },
+      yellowContestantId: 0,
+      purpleContestantId: 0,
+      yellowContestant: { id: 0, name: payload.yellow, group: "CREW" as ContestantGroup, eventId: 0 },
+      purpleContestant: { id: 0, name: payload.purple, group: "CREW" as ContestantGroup, eventId: 0 },
       winnerId: null,
       winner: null,
       votingOpen: true,
