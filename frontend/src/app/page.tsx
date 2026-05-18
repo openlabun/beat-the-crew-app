@@ -14,6 +14,7 @@ import { ForfeitState } from "@/components/voter/forfeit-state"
 import { useScreenCommand } from "@/lib/socket-context"
 import { useVisibilityRehydrate } from "@/lib/visibility-rehydrate"
 import { useVotingClosed } from '@/lib/socket-context'
+import { VoteTransition } from "@/components/voter/vote-transition"
 
 function VoterApp() {
   const [appState, setAppState] = useState<AppState>({ status: "waiting" })
@@ -56,6 +57,7 @@ function VoterApp() {
 
   // Socket event handlers
   const handleVotingOpened = useCallback((payload: { battleId: number; yellow: string; purple: string }) => {
+    if (navigator.vibrate) navigator.vibrate(200)
     const battle: Battle = {
       id: payload.battleId,
       round: 0,
@@ -171,12 +173,22 @@ function VoterApp() {
       const votedBattles = JSON.parse(localStorage.getItem("btc_voted_battles") || "{}")
       votedBattles[appState.battle.id] = choice
       localStorage.setItem("btc_voted_battles", JSON.stringify(votedBattles))
+      if (navigator.vibrate) navigator.vibrate(80)
 
       setAppState({
-        status: "voted",
+        status:"vote_transition",
         battle: appState.battle,
         choice,
       })
+
+      setTimeout(() => {
+        setAppState({
+          status:"voted",
+          battle: appState.battle,
+          choice,
+        })
+
+      }, 1200)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to cast vote")
     } finally {
@@ -212,6 +224,11 @@ function VoterApp() {
         <ForfeitState
           forfeitingName={appState.forfeitingName}
           winnerName={appState.winnerName}
+        />
+      )}
+      {appState.status === "vote_transition" && (
+        <VoteTransition
+          choice={appState.choice}
         />
       )}
     </main>

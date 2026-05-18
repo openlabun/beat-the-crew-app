@@ -101,3 +101,4 @@ export type AppState =
   | { status: "winner"; battle: Battle; winnerId: number; winnerName: string; yellowVotes: number; purpleVotes: number }
   | { status: "tie"; battle: Battle }
   | { status: "forfeit"; battle: Battle; forfeitingName: string; winnerName: string }
+  | { status: "vote_transition"; battle: Battle; choice: VoteChoice }
