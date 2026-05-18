@@ -11,6 +11,7 @@ import { TieReveal } from "@/components/screen/tie-reveal"
 import { VotingTimer } from "@/components/screen/voting-timer"
 import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
+import { useVisibilityRehydrate } from "@/lib/visibility-rehydrate"
 
 type ScreenMode = "logo" | "bracket" | "winner" | "tie" | "timer"
 
@@ -70,6 +71,12 @@ function ScreenApp() {
     } catch (err) {
     }
   }, [])
+
+  const rehydrate = useCallback(() => {
+    if (eventId) loadData(eventId, state.group)
+  }, [eventId, state.group, loadData])
+
+  useVisibilityRehydrate(rehydrate)
 
   useEffect(() => {
     if (eventId) loadData(eventId, state.group)

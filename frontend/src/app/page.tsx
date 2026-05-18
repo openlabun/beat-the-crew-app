@@ -12,6 +12,7 @@ import { WinnerState } from "@/components/voter/winner-state"
 import { TieState } from "@/components/voter/tie-state"
 import { ForfeitState } from "@/components/voter/forfeit-state"
 import { useScreenCommand } from "@/lib/socket-context"
+import { useVisibilityRehydrate } from "@/lib/visibility-rehydrate"
 
 function VoterApp() {
   const [appState, setAppState] = useState<AppState>({ status: "waiting" })
@@ -31,39 +32,26 @@ function VoterApp() {
   }, [])
 
   // Check for active battle on mount and when user returns to tab
-  useEffect(() => {
-    async function checkActiveBattle() {
-      try {
-        const battle = await getCurrentBattle()
-        if (battle && battle.votingOpen) {
-          const votedBattles = JSON.parse(localStorage.getItem("btc_voted_battles") || "{}")
-          if (votedBattles[battle.id]) {
-            setAppState({ status: "voted", battle, choice: votedBattles[battle.id] as VoteChoice })
-          } else {
-            setAppState({ status: "voting", battle })
-          }
+  const checkActiveBattle = useCallback(async () => {
+    try {
+      const battle = await getCurrentBattle()
+      if (battle && battle.votingOpen) {
+        const votedBattles = JSON.parse(localStorage.getItem("btc_voted_battles") || "{}")
+        if (votedBattles[battle.id]) {
+          setAppState({ status: "voted", battle, choice: votedBattles[battle.id] as VoteChoice })
         } else {
-          // No active battle, only reset to waiting if not already voted/winner state
-          setAppState(prev => 
-            prev.status === "voting" ? { status: "waiting" } : prev
-          )
+          setAppState({ status: "voting", battle })
         }
-      } catch (err) {}
-    }
-
-    // Run on mount
-    checkActiveBattle()
-
-    // Run when user tabs back in
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkActiveBattle()
+      } else {
+        setAppState(prev =>
+          prev.status === "voting" ? { status: "waiting" } : prev
+        )
       }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+    } catch (err) {}
   }, [])
+
+  useEffect(() => { checkActiveBattle() }, [checkActiveBattle])
+  useVisibilityRehydrate(checkActiveBattle)
 
   // Socket event handlers
   const handleVotingOpened = useCallback((payload: { battleId: number; yellow: string; purple: string }) => {
