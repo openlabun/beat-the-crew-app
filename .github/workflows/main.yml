@@ -4,7 +4,7 @@ name: Deploy
 on:
     # Triggers the workflow on push or pull request events but only for the master branch
     push:
-        branches: [ release ]
+        branches: [ main ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -25,6 +25,6 @@ jobs:
                   script: |
                       set -euo pipefail
                       cd /home/proyecto/beatthecrew/
-                      git pull origin release
+                      git pull origin main
                       git status
                       docker compose up -d
