@@ -24,12 +24,12 @@ export function VotedState({ battle, choice }: VotedStateProps) {
         {[...Array(5)].map((_, i) => (
           <div
             key={i}
-            className={`absolute rounded-full border-2 ${
+            className={`absolute rounded-full border-7 ${
               isYellow ? "border-btc-dark/10" : "border-white/10"
             } animate-radiate`}
             style={{
-              width: "100%",
-              height: "100%",
+              width: "50%",
+              height: "50%",
               maxWidth: "200vw",
               maxHeight: "200vh",
               animationDelay: `${i * 0.4}s`,
