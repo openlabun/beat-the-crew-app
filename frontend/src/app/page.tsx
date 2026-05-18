@@ -30,9 +30,8 @@ function VoterApp() {
     setUserId(id)
   }, [])
 
-  // Check for active battle on load and when reconnecting
+  // Check for active battle on mount and when user returns to tab
   useEffect(() => {
-    if (!isConnected) return
     async function checkActiveBattle() {
       try {
         const battle = await getCurrentBattle()
@@ -43,11 +42,28 @@ function VoterApp() {
           } else {
             setAppState({ status: "voting", battle })
           }
+        } else {
+          // No active battle, only reset to waiting if not already voted/winner state
+          setAppState(prev => 
+            prev.status === "voting" ? { status: "waiting" } : prev
+          )
         }
       } catch (err) {}
     }
+
+    // Run on mount
     checkActiveBattle()
-  }, [isConnected])
+
+    // Run when user tabs back in
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkActiveBattle()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
 
   // Socket event handlers
   const handleVotingOpened = useCallback((payload: { battleId: number; yellow: string; purple: string }) => {
