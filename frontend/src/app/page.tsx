@@ -127,22 +127,7 @@ function VoterApp() {
     delete votedBattles[payload.battleId]
     localStorage.setItem("btc_voted_battles", JSON.stringify(votedBattles))
 
-    const battle: Battle = {
-      id: payload.battleId,
-      round: 0,
-      position: 0,
-      eventId: 0,
-      group: "CREW" as ContestantGroup,
-      yellowContestantId: 0,
-      purpleContestantId: 0,
-      yellowContestant: { id: 0, name: payload.yellow, group: "CREW" as ContestantGroup, eventId: 0 },
-      purpleContestant: { id: 0, name: payload.purple, group: "CREW" as ContestantGroup, eventId: 0 },
-      winnerId: null,
-      winner: null,
-      votingOpen: true,
-      active: true,
-    }
-    setAppState({ status: "voting", battle })
+    setAppState({ status: "waiting" })
   }, [])
 
   const handleBattleForfeit = useCallback((payload: { battleId: number; forfeitingName: string; winnerName: string }) => {
