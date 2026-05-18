@@ -28,7 +28,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     debugger
     console.log("connecting: " + process.env.NEXT_PUBLIC_API_URL )
-    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "https://beatthecrew-api.openlab.uninorte.edu.co"
     const socketInstance = io(socketUrl, {
       transports: ["websocket", "polling"],
       reconnection: true,
