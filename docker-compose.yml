@@ -20,7 +20,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: production
-    container_name: btc-backend
+    container_name: beatthecrew-api
     env_file:
       - .env
     environment:
@@ -38,7 +38,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: production
-    container_name: btc-frontend
+    container_name: beatthecrew
     env_file:
       - .env
     environment:
