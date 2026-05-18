@@ -27,4 +27,5 @@ jobs:
                       cd /home/proyecto/beatthecrew/
                       git pull origin main
                       git status
+                      docker compose down
                       docker compose up -d --build
