@@ -11,6 +11,7 @@ import {
   announceResult,
   rerunBattle,
   forfeitBattle,
+  updateContestant,
 } from "@/lib/api"
 import { ContestantGroup, type Battle, type Event, type VoteTally } from "@/lib/types"
 import { VotingControl } from "./voting-control"
@@ -173,6 +174,15 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   }
 
+  const handleEditName = async (contestantId: number, newName: string) => {
+    try {
+      await updateContestant(contestantId, newName)
+      if (eventId) await loadEventData(eventId)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update name")
+    }
+  }
+
   // Show event setup screen if no event selected
   if (!eventId) {
     return (
@@ -270,6 +280,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
               activeBattleId={activeBattle?.id || null}
               onRefresh={() => eventId && loadEventData(eventId)}
               onForfeit={handleForfeit}
+              onEditName={handleEditName}
             />
           </>
         )}
