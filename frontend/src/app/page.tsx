@@ -213,10 +213,8 @@ function VoterApp() {
       {appState.status === "winner" && (
         <WinnerState
           battle={appState.battle}
-          winnerId={appState.winnerId}
+          yellowName={appState.battle.yellowContestant?.name || "Amarillo"}
           winnerName={appState.winnerName}
-          yellowVotes={appState.yellowVotes}
-          purpleVotes={appState.purpleVotes}
         />
       )}
       {appState.status === "tie" && <TieState battle={appState.battle} />}
