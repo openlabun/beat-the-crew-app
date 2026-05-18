@@ -21,7 +21,7 @@ RUN pnpm run build
 # =========================
 FROM node:lts-alpine AS production
 WORKDIR /app
-
+ENV NEXT_PUBLIC_API_URL = ${NEXT_PUBLIC_API_URL}
 ENV NODE_ENV=production
 
 RUN npm install -g pnpm && \
