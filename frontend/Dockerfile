@@ -21,7 +21,9 @@ RUN pnpm run build
 # =========================
 FROM node:lts-alpine AS production
 WORKDIR /app
+ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL = ${NEXT_PUBLIC_API_URL}
+
 ENV NODE_ENV=production
 
 RUN npm install -g pnpm && \
@@ -46,6 +48,9 @@ CMD ["node", "server.js"]
 # =========================
 FROM node:lts-alpine AS development
 WORKDIR /app
+
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL = ${NEXT_PUBLIC_API_URL}
 
 RUN npm install -g pnpm && \
     pnpm config set store-dir /home/node/.pnpm-store
