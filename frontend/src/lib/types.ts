@@ -71,14 +71,14 @@ export interface BattleWinnerPayload {
 
 export interface BattleTiePayload {
   battleId: number
-  yellow: { id: number; name: string }
-  purple: { id: number; name: string }
+  yellow: string
+  purple: string
 }
 
 export interface BattleRerunPayload {
   battleId: number
-  yellow: { id: number; name: string }
-  purple: { id: number; name: string }
+  yellow: string
+  purple: string
 }
 
 export interface BattleForfeitPayload {
