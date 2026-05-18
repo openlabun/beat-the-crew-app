@@ -80,6 +80,15 @@ export function useVotingOpened(callback: (payload: VotingOpenedPayload) => void
   }, [socket, callback])
 }
 
+export function useVotingClosed(callback: (payload: { battleId: number }) => void) {
+  const { socket } = useSocket()
+  useEffect(() => {
+    if (!socket) return
+    socket.on('voting:closed', callback)
+    return () => { socket.off('voting:closed', callback) }
+  }, [socket, callback])
+}
+
 export function useBattleWinner(callback: (payload: BattleWinnerPayload) => void) {
   const { socket } = useSocket()
 

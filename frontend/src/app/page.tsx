@@ -13,6 +13,7 @@ import { TieState } from "@/components/voter/tie-state"
 import { ForfeitState } from "@/components/voter/forfeit-state"
 import { useScreenCommand } from "@/lib/socket-context"
 import { useVisibilityRehydrate } from "@/lib/visibility-rehydrate"
+import { useVotingClosed } from '@/lib/socket-context'
 
 function VoterApp() {
   const [appState, setAppState] = useState<AppState>({ status: "waiting" })
@@ -83,6 +84,16 @@ function VoterApp() {
       setAppState({ status: "voting", battle })
     }
     setError(null)
+  }, [])
+
+  const handleVotingClosed = useCallback((payload: { battleId: number }) => {
+    setAppState(prev => {
+      // Only reset to waiting if they haven't voted yet
+      if (prev.status === 'voting' && prev.battle.id === payload.battleId) {
+        return { status: 'waiting' }
+      }
+      return prev
+    })
   }, [])
 
   const handleBattleWinner = useCallback((payload: { battleId: number; winnerId: number; winnerName: string; yellowVotes: number; purpleVotes: number }) => {
@@ -156,6 +167,7 @@ function VoterApp() {
 
   useScreenCommand(handleScreenCommand)
   useVotingOpened(handleVotingOpened)
+  useVotingClosed(handleVotingClosed)
   useBattleWinner(handleBattleWinner)
   useBattleTie(handleBattleTie)
   useBattleRerun(handleBattleRerun)

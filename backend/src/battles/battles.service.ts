@@ -91,6 +91,7 @@ export class BattlesService {
     const isTie = battle.yellowVotes === battle.purpleVotes;
 
     this.logger.log(`Closing voting for battle ${battleId}. Yellow: ${battle.yellowVotes}, Purple: ${battle.purpleVotes}.`);
+    this.gateway.emitVotingClosed({ battleId })
 
     return this.prisma.battle.update({
       where: { id: battleId },

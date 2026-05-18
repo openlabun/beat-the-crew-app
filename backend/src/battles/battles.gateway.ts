@@ -29,6 +29,10 @@ export class BattlesGateway implements OnGatewayConnection, OnGatewayDisconnect 
     this.server.emit('voting:opened', payload);
   }
 
+  emitVotingClosed(payload: { battleId: number }) {
+    this.server.emit('voting:closed', payload)
+  }
+
   // Admin revealed the winner
   emitBattleWinner(payload: {
     battleId: number;
