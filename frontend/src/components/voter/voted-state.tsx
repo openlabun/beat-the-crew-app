@@ -19,25 +19,6 @@ export function VotedState({ battle, choice }: VotedStateProps) {
         isYellow ? "bg-btc-yellow" : "bg-btc-purple"
       }`}
     >
-      {/* Radiating circles background */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className={`absolute rounded-full border-7 ${
-              isYellow ? "border-btc-dark/10" : "border-white/10"
-            } animate-radiate`}
-            style={{
-              width: "50%",
-              height: "50%",
-              maxWidth: "200vw",
-              maxHeight: "200vh",
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
-      </div>
-
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center text-center p-6 space-y-6">
         {/* Contestant Name */}
